@@ -8,7 +8,6 @@ pub trait Reportable {
     fn to_ds(&self) -> Option<&DSReport>;
 }
 
-
 bitflags! {
     pub struct XButton: u16 {
         const DpadUp = 1;
@@ -57,7 +56,7 @@ pub struct XUSBReport {
 impl Reportable for XUSBReport {
     type Output = XUSB_REPORT;
     fn to_raw(&self) -> XUSB_REPORT {
-         XUSB_REPORT {
+        XUSB_REPORT {
             wButtons: self.w_buttons.bits(),
             bLeftTrigger: self.b_left_trigger,
             bRightTrigger: self.b_right_trigger,
@@ -91,6 +90,19 @@ impl Default for XUSBReport {
     }
 }
 
+#[derive(Copy, Clone)]
+pub enum DS4Dpad {
+    None = 8,
+    Northwest = 7,
+    West = 6,
+    Southwest = 5,
+    South = 4,
+    Southeast = 3,
+    East = 2,
+    Northeast = 1,
+    North = 0,
+}
+
 bitflags! {
     pub struct DS4Button: u16 {
         const ThumbRight = 32768;
@@ -105,7 +117,34 @@ bitflags! {
         const Circle = 64;
         const Cross = 32;
         const Square = 16;
-        const Nothing = 0;
+        /// A default DS4Button has flag 8 not 0
+        /// The below flags cannot be combined and should be applied using the `DS4Button::set_dpad` function
+        const Nothing = 8;
+        const Northwest = 7;
+        const West = 6;
+        const Southwest = 5;
+        const South = 4;
+        const Southeast = 3;
+        const East = 2;
+        const Northeast = 1;
+        const North = 0;
+    }
+}
+
+impl DS4Button {
+    pub fn set_dpad(&mut self, dpad: DS4Dpad) {
+        let mut v = self.bits();
+        // Clear any ds4pad flags
+        v &= !0xF;
+        v |= dpad as u16;
+
+        *self = DS4Button::from_bits_truncate(v);
+    }
+}
+
+impl Default for DS4Button {
+    fn default() -> Self {
+        DS4Button::Nothing
     }
 }
 
@@ -114,19 +153,6 @@ pub enum SpecialButton {
     PS = 1,
     Touchpad = 2,
     Nothing = 0,
-}
-
-#[derive(Copy, Clone)]
-pub enum DS4Dpad {
-    None = 8,
-    Northwest = 7,
-    West = 6,
-    Southwest = 5,
-    South = 4,
-    Southeast = 3,
-    East = 2,
-    Northeast = 1,
-    North = 0,
 }
 
 pub struct DSReport {
@@ -174,7 +200,7 @@ impl Default for DSReport {
             b_thumb_ry: 0,
             b_trigger_l: 0,
             b_trigger_r: 0,
-            w_buttons: DS4Button::Nothing,
+            w_buttons: DS4Button::default(),
         }
     }
 }
