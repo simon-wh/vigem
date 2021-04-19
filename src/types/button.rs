@@ -194,10 +194,10 @@ impl Default for DSReport {
     fn default() -> Self {
         Self {
             b_special: SpecialButton::Nothing,
-            b_thumb_lx: 0,
-            b_thumb_ly: 0,
-            b_thumb_rx: 0,
-            b_thumb_ry: 0,
+            b_thumb_lx: 0x80,
+            b_thumb_ly: 0x80,
+            b_thumb_rx: 0x80,
+            b_thumb_ry: 0x80,
             b_trigger_l: 0,
             b_trigger_r: 0,
             w_buttons: DS4Button::default(),
